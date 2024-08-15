@@ -1,2 +1,15 @@
 @import url(https://lsong.org/css/stylesheet.css);
 @import url(https://lsong.org/stylesheets/card.css);
+@import url(https://lsong.org/stylesheets/progressbar.css);
+
+.otp-code {
+  cursor: pointer;
+  font-size: 2em;
+  font-family: monospace;
+  letter-spacing: 2px;
+}
+
+.progress-bar {
+  height: 4px;
+  border-radius: 2px;
+}

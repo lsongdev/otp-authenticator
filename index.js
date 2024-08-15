@@ -1,8 +1,9 @@
 import "https://lsong.org/js/application.js";
 import { ready } from 'https://lsong.org/scripts/dom.js';
+import { copy } from 'https://lsong.org/scripts/clipboard.js';
 import { sha1hmac } from 'https://lsong.org/scripts/crypto.js';
 import { base32decode } from 'https://lsong.org/scripts/crypto/base32.js';
-import { h, render, useState, useEffect, useLocalStorageState } from 'https://lsong.org/scripts/react/index.js';
+import { h, render, useState, useEffect, useLocalStorageState, ProgressBar } from 'https://lsong.org/scripts/react/index.js';
 
 async function generateTOTP(secret) {
   const epoch = Math.floor(Date.now() / 1000);
@@ -36,58 +37,30 @@ const SiteItem = ({ site }) => {
     }, 1000);
     return () => clearInterval(interval);
   }, [site]);
-
   const cardStyle = {
     marginBottom: '16px',
   };
-
   const contentStyle = {
-    display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: '8px',
   };
-
   const issuerStyle = {
     fontSize: '18px',
     fontWeight: 'bold',
   };
-
-  const otpStyle = {
-    fontSize: '24px',
-    fontFamily: 'monospace',
-    letterSpacing: '2px',
-  };
-
-  const progressBarStyle = {
-    height: '4px',
-    backgroundColor: '#e0e0e0',
-    borderRadius: '2px',
-    overflow: 'hidden',
-  };
-
-  const progressStyle = {
-    height: '100%',
-    width: `${(timeLeft / 30) * 100}%`,
-    backgroundColor: timeLeft > 5 ? '#4CAF50' : '#FF5722',
-    transition: 'width 1s linear',
-  };
-
-  // Extract username from otpauth URL
   const url = new URL(site.otpAuthUrl);
   const username = decodeURIComponent(url.pathname.split('/').pop());
-
+  const progressBarCls = timeLeft > 5 ? 'progress-bar-green' : 'progress-bar-red';
   return h('div', { style: cardStyle, className: 'card' }, [
-    h('div', { style: contentStyle }, [
+    h('div', { style: contentStyle, className: 'flex flex-center' }, [
       h('div', null, [
         h('div', { style: issuerStyle }, username),
         h('div', null, site.issuer),
       ]),
-      h('div', { style: otpStyle }, otp),
+      h('div', { className: "otp-code", onClick: () => copy(otp) }, otp),
     ]),
-    h('div', { style: progressBarStyle }, 
-      h('div', { style: progressStyle })
-    ),
+    h(ProgressBar, { value: timeLeft, max: 30, className: progressBarCls }),
   ]);
 };
 
@@ -132,8 +105,8 @@ const App = () => {
     }
   };
 
-  return h('div', { }, [
-    h('h2', { }, "OTP Authenticator"),
+  return h('div', {}, [
+    h('h2', {}, "OTP Authenticator"),
     h('form', { onSubmit, style: formStyle }, [
       h('input', {
         style: inputStyle,
