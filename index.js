@@ -9,9 +9,10 @@ async function generateTOTP(secret) {
   const time = new Uint8Array(8);
   new DataView(time.buffer).setUint32(4, Math.floor(epoch / 30), false);
   const key = decode(secret);
-  const hmac = await sha1hmac(key, time);
+  const result = await sha1hmac(key, time);
+  const hmac = result instanceof Uint8Array ? result : new Uint8Array(result);
   const offset = hmac[19] & 0xf;
-  const otp = new DataView(hmac.buffer).getUint32(offset) & 0x7fffffff;
+  const otp = new DataView(hmac.buffer, hmac.byteOffset, hmac.byteLength).getUint32(offset) & 0x7fffffff;
   return (otp % 1000000).toString().padStart(6, '0');
 }
 
